@@ -40,15 +40,15 @@ Whether it's a star, a professional connection, or a coffee, every gesture helps
 
 ```mermaid
 flowchart LR
- iam["tf-mod-aws-iam-role"]
- kms["tf-mod-aws-kms"]
- s3["tf-mod-aws-s3-bucket"]
- rds["tf-mod-aws-rds"]
- efs["tf-mod-aws-efs"]
- ebs["tf-mod-aws-ebs-volume"]
- sm["tf-mod-aws-secrets-manager"]
- ddb["tf-mod-aws-dynamodb"]
- ct["tf-mod-aws-cloudtrail"]
+ iam["terraform-aws-iam-role"]
+ kms["terraform-aws-kms"]
+ s3["terraform-aws-s3-bucket"]
+ rds["terraform-aws-rds"]
+ efs["terraform-aws-efs"]
+ ebs["terraform-aws-ebs-volume"]
+ sm["terraform-aws-secrets-manager"]
+ ddb["terraform-aws-dynamodb"]
+ ct["terraform-aws-cloudtrail"]
 
  iam -->|administrator / user ARNs| kms
  kms -->|key arn| s3
@@ -70,7 +70,7 @@ KMS is a **foundation** module: it consumes only IAM principal ARNs (administrat
 
 ```mermaid
 flowchart TD
- subgraph module["tf-mod-aws-kms"]
+ subgraph module["terraform-aws-kms"]
  key["aws_kms_key.this<br/>(keystone CMK)"]
  pol["aws_kms_key_policy.this<br/>(lockout-safe policy)"]
  alias["aws_kms_alias.this<br/>(alias/&lt;name&gt;)"]
@@ -152,7 +152,7 @@ The Terraform identity needs the following actions. Scope to the key ARN where p
 ## 📁 Module Structure
 
 ```text
-tf-mod-aws-kms/
+terraform-aws-kms/
 ├── providers.tf # required_providers + configuration_aliases = [aws, aws.replica]
 ├── variables.tf # name, key config, policy inputs, aliases, grants, replica, tags
 ├── main.tf # aws_kms_key.this + policy + aliases + grants + replica
@@ -169,7 +169,7 @@ Smallest working call — a single-Region, rotation-enabled CMK with a friendly 
 
 ```hcl
 module "kms" {
-  source = "git::https://github.com/microsoftexpert/tf-mod-aws-kms?ref=v1.0.0"
+  source = "git::https://github.com/microsoftexpert/terraform-aws-kms?ref=v1.0.0"
 
   name        = "app-data"
   description = "Encrypts application data at rest."
@@ -201,9 +201,9 @@ module "kms" {
 
 | Input | Type | Source module |
 |---|---|---|
-| `key_administrators` | `list(string)` (IAM ARNs) | `tf-mod-aws-iam-role` / `tf-mod-aws-iam-user` |
-| `key_users` | `list(string)` (IAM ARNs) | `tf-mod-aws-iam-role` |
-| `grants[*].grantee_principal` | `string` (IAM ARN) | `tf-mod-aws-iam-role` |
+| `key_administrators` | `list(string)` (IAM ARNs) | `terraform-aws-iam-role` / `terraform-aws-iam-user` |
+| `key_users` | `list(string)` (IAM ARNs) | `terraform-aws-iam-role` |
+| `grants[*].grantee_principal` | `string` (IAM ARN) | `terraform-aws-iam-role` |
 | `key_service_principals` | `list(string)` (service principals) | n/a (AWS service names) |
 
 > KMS is a **foundation** module — it consumes nothing from other infrastructure modules, only IAM principal ARNs.
@@ -232,7 +232,7 @@ module "kms" {
 
 ```hcl
 module "kms" {
-  source = "git::https://github.com/microsoftexpert/tf-mod-aws-kms?ref=v1.0.0"
+  source = "git::https://github.com/microsoftexpert/terraform-aws-kms?ref=v1.0.0"
 
   name = "app-data"
 
@@ -260,7 +260,7 @@ provider "aws" {
 }
 
 module "kms" {
-  source = "git::https://github.com/microsoftexpert/tf-mod-aws-kms?ref=v1.0.0"
+  source = "git::https://github.com/microsoftexpert/terraform-aws-kms?ref=v1.0.0"
 
   name = "app-data"
 
@@ -285,12 +285,12 @@ module "kms" {
 
 ```hcl
 module "kms" {
-  source = "git::https://github.com/microsoftexpert/tf-mod-aws-kms?ref=v1.0.0"
+  source = "git::https://github.com/microsoftexpert/terraform-aws-kms?ref=v1.0.0"
 
   name        = "app-data"
   description = "App data CMK with delegated admin + usage."
 
-  # Wired from tf-mod-aws-iam-role outputs — module assembles a lockout-safe policy.
+  # Wired from terraform-aws-iam-role outputs — module assembles a lockout-safe policy.
   key_administrators = [module.kms_admin_role.arn]
   key_users          = [module.app_role.arn]
 
@@ -307,7 +307,7 @@ module "kms" {
 
 ```hcl
 module "logs_kms" {
-  source = "git::https://github.com/microsoftexpert/tf-mod-aws-kms?ref=v1.0.0"
+  source = "git::https://github.com/microsoftexpert/terraform-aws-kms?ref=v1.0.0"
 
   name = "cloudwatch-logs"
 
@@ -330,7 +330,7 @@ module "logs_kms" {
 
 ```hcl
 module "bucket_kms" {
-  source = "git::https://github.com/microsoftexpert/tf-mod-aws-kms?ref=v1.0.0"
+  source = "git::https://github.com/microsoftexpert/terraform-aws-kms?ref=v1.0.0"
 
   name = "bucket-sse"
 
@@ -341,7 +341,7 @@ module "bucket_kms" {
 }
 
 module "bucket" {
-  source      = "git::https://github.com/microsoftexpert/tf-mod-aws-s3-bucket?ref=v1.0.0"
+  source      = "git::https://github.com/microsoftexpert/terraform-aws-s3-bucket?ref=v1.0.0"
   bucket_name = "casey-app-data"
 
   # SSE-KMS with the customer-managed key
@@ -355,7 +355,7 @@ module "bucket" {
 
 ```hcl
 module "kms" {
-  source = "git::https://github.com/microsoftexpert/tf-mod-aws-kms?ref=v1.0.0"
+  source = "git::https://github.com/microsoftexpert/terraform-aws-kms?ref=v1.0.0"
 
   name = "shared"
 
@@ -375,7 +375,7 @@ module "kms" {
 
 ```hcl
 module "kms" {
-  source = "git::https://github.com/microsoftexpert/tf-mod-aws-kms?ref=v1.0.0"
+  source = "git::https://github.com/microsoftexpert/terraform-aws-kms?ref=v1.0.0"
 
   name = "grant-demo"
 
@@ -402,7 +402,7 @@ module "kms" {
 
 ```hcl
 module "kms" {
-  source = "git::https://github.com/microsoftexpert/tf-mod-aws-kms?ref=v1.0.0"
+  source = "git::https://github.com/microsoftexpert/terraform-aws-kms?ref=v1.0.0"
 
   name                    = "fast-rotate"
   enable_key_rotation     = true
@@ -421,7 +421,7 @@ module "kms" {
 
 ```hcl
 module "signing_key" {
-  source = "git::https://github.com/microsoftexpert/tf-mod-aws-kms?ref=v1.0.0"
+  source = "git::https://github.com/microsoftexpert/terraform-aws-kms?ref=v1.0.0"
 
   name                     = "doc-signing"
   key_usage                = "SIGN_VERIFY"
@@ -441,7 +441,7 @@ module "signing_key" {
 
 ```hcl
 module "hmac_key" {
-  source = "git::https://github.com/microsoftexpert/tf-mod-aws-kms?ref=v1.0.0"
+  source = "git::https://github.com/microsoftexpert/terraform-aws-kms?ref=v1.0.0"
 
   name                     = "token-mac"
   key_usage                = "GENERATE_VERIFY_MAC"
@@ -475,7 +475,7 @@ data "aws_iam_policy_document" "key" {
 }
 
 module "kms" {
-  source = "git::https://github.com/microsoftexpert/tf-mod-aws-kms?ref=v1.0.0"
+  source = "git::https://github.com/microsoftexpert/terraform-aws-kms?ref=v1.0.0"
 
   name = "custom-policy"
 
@@ -504,7 +504,7 @@ provider "aws" {
 }
 
 module "kms" {
-  source = "git::https://github.com/microsoftexpert/tf-mod-aws-kms?ref=v1.0.0"
+  source = "git::https://github.com/microsoftexpert/terraform-aws-kms?ref=v1.0.0"
 
   name         = "dr-data"
   multi_region = true # REQUIRED before a replica can exist
@@ -532,7 +532,7 @@ module "kms" {
 ```hcl
 # ⚠️ Weakens the baseline. Document the exception and get sign-off.
 module "kms" {
-  source = "git::https://github.com/microsoftexpert/tf-mod-aws-kms?ref=v1.0.0"
+  source = "git::https://github.com/microsoftexpert/terraform-aws-kms?ref=v1.0.0"
 
   name                    = "legacy-compat"
   enable_key_rotation     = false # OPT-OUT: rotation disabled (discouraged)
@@ -552,20 +552,20 @@ module "kms" {
 ```hcl
 # 1) Roles that administer and use the key
 module "kms_admin_role" {
-  source             = "git::https://github.com/microsoftexpert/tf-mod-aws-iam-role?ref=v1.0.0"
+  source             = "git::https://github.com/microsoftexpert/terraform-aws-iam-role?ref=v1.0.0"
   name               = "kms-admin"
   assume_role_policy = data.aws_iam_policy_document.admin_trust.json
 }
 
 module "db_role" {
-  source             = "git::https://github.com/microsoftexpert/tf-mod-aws-iam-role?ref=v1.0.0"
+  source             = "git::https://github.com/microsoftexpert/terraform-aws-iam-role?ref=v1.0.0"
   name               = "rds-monitoring"
   assume_role_policy = data.aws_iam_policy_document.rds_trust.json
 }
 
 # 2) The CMK — administered and used by the roles above
 module "db_kms" {
-  source = "git::https://github.com/microsoftexpert/tf-mod-aws-kms?ref=v1.0.0"
+  source = "git::https://github.com/microsoftexpert/terraform-aws-kms?ref=v1.0.0"
 
   name               = "rds-storage"
   description        = "Encrypts the application RDS instance at rest."
@@ -582,7 +582,7 @@ module "db_kms" {
 
 # 3) RDS encrypts at rest with the customer-managed key
 module "rds" {
-  source            = "git::https://github.com/microsoftexpert/tf-mod-aws-rds?ref=v1.0.0"
+  source            = "git::https://github.com/microsoftexpert/terraform-aws-rds?ref=v1.0.0"
   identifier        = "app-db"
   storage_encrypted = true
   kms_key_id        = module.db_kms.arn # ARN is the cross-resource reference
@@ -726,7 +726,7 @@ tags_all = {
 - AWS KMS Developer Guide — key policies, grants, automatic key rotation, multi-Region keys
 - AWS KMS Developer Guide — scheduling and canceling key deletion
 - AWS Service Quotas — KMS resource and request-rate quotas
-- module suite — `tf-mod-aws-iam-role`, `tf-mod-aws-s3-bucket`, `tf-mod-aws-rds`, `tf-mod-aws-secrets-manager`
+- module suite — `terraform-aws-iam-role`, `terraform-aws-s3-bucket`, `terraform-aws-rds`, `terraform-aws-secrets-manager`
 
 ---
 

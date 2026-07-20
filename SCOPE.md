@@ -1,4 +1,4 @@
-# tf-mod-aws-kms — SCOPE
+# terraform-aws-kms — SCOPE
 
 Composite module for a secure-by-default AWS KMS customer-managed key (CMK). It owns
 the key, its human-friendly alias, the key policy, optional grants, and an optional
@@ -32,9 +32,9 @@ Referenced by `arn`, never created here:
 
 | Input | Type | Source module |
 |---|---|---|
-| `key_administrators` | `list(string)` (IAM ARNs) | `tf-mod-aws-iam-role` / `tf-mod-aws-iam-user` |
-| `key_users` | `list(string)` (IAM ARNs) | `tf-mod-aws-iam-role` |
-| `grants[*].grantee_principal` | `string` (IAM ARN) | `tf-mod-aws-iam-role` |
+| `key_administrators` | `list(string)` (IAM ARNs) | `terraform-aws-iam-role` / `terraform-aws-iam-user` |
+| `key_users` | `list(string)` (IAM ARNs) | `terraform-aws-iam-role` |
+| `grants[*].grantee_principal` | `string` (IAM ARN) | `terraform-aws-iam-role` |
 
 > **Foundation module** — KMS consumes nothing from other infrastructure modules.
 > It emits `arn` / `key_id` / alias ARN that the rest of the suite encrypts against.
